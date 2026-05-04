@@ -1,0 +1,19 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+gem "faraday-retry", "~> 2.4"
+gem "jwt", ">= 2.9.3", "< 4.0"
+gem "octokit", ">= 9.2", "< 11.0"
+gem "redacting-logger", "~> 1.5"
+
+group :development do
+  gem "irb", "~> 1.15"
+  gem "rspec", "~> 3.13"
+  gem "rubocop", "~> 1.79"
+  gem "rubocop-github", "~> 0.23"
+  gem "rubocop-performance", "~> 1.25"
+  gem "rubocop-rspec", "~> 3.6"
+  gem "simplecov", "~> 0.22"
+  gem "simplecov-erb", "~> 1.0"
+end
