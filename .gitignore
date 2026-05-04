@@ -1,0 +1,17 @@
+bin/
+coverage/
+logs/
+tmp/
+tarballs/
+vendor/gems/
+.idea
+.byebug_history
+.local/
+.ruby-lsp/
+.DS_Store
+.lesshst
+*.pem
+*.key
+*.crt
+*.csr
+*.secret
