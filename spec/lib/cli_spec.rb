@@ -82,6 +82,20 @@ describe ActiveGitHubOrgMembers::CLI do
     expect(stdout.string).to include("alice")
   end
 
+  it "accepts an app key source override" do
+    empty_scan_stubs
+    expect(GitHub).to receive(:new).with(app_key: "op://ExampleVault/item/private-key.pem").and_return(github)
+
+    exit_code = described_class.run(
+      argv: ["acme", "--app-key", "op://ExampleVault/item/private-key.pem"],
+      stdout: stdout,
+      stderr: stderr,
+      now: now
+    )
+
+    expect(exit_code).to eq(0)
+  end
+
   it "keeps default branch only scans explicit for compatibility" do
     empty_scan_stubs(branch_mode: :default)
 

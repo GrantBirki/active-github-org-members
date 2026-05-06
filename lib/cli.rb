@@ -23,7 +23,7 @@ class ActiveGitHubOrgMembers
       scanner = ActiveGitHubOrgMembers.new(
         org: options.fetch(:org),
         days: options.fetch(:days),
-        github: @github || GitHub.new,
+        github: @github || GitHub.new(app_key: options[:app_key]),
         all_branches: options.fetch(:all_branches),
         now: @now
       )
@@ -84,6 +84,9 @@ class ActiveGitHubOrgMembers
           end
           parser.on("--json", "Emit JSON output") do
             options[:json] = true
+          end
+          parser.on("--app-key APP_KEY_SOURCE", "GitHub App key source (.pem path or op:// reference)") do |app_key|
+            options[:app_key] = app_key
           end
         end
 

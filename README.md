@@ -19,6 +19,17 @@ export GH_APP_INSTALLATION_ID="87654321"
 export GH_APP_KEY="<GitHub App private key PEM with newlines escaped as \n>"
 ```
 
+Instead of setting `GH_APP_KEY`, you can pass a key source at runtime. Supported
+secret references are resolved by URI scheme. The first supported provider is
+1Password, where `op://...` references are read with `op read`:
+
+```bash
+script/server my-org \
+  --app-key "op://ExampleVault/example-item//github-app.private-key.pem"
+```
+
+When `--app-key` is omitted, the CLI falls back to `GH_APP_KEY`.
+
 Optional knobs:
 
 ```bash

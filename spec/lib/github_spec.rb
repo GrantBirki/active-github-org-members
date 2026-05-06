@@ -109,6 +109,32 @@ describe GitHub do
       end
     end
 
+    it "loads app key from a supported secret reference" do
+      allow(SecretResolver).to receive(:supported_reference?)
+        .with("op://ExampleVault/item/private-key.pem")
+        .and_return(true)
+      allow(SecretResolver).to receive(:read)
+        .with("op://ExampleVault/item/private-key.pem")
+        .and_return(app_key)
+
+      github = GitHub.new(app_id: 999, installation_id: 888, app_key: "op://ExampleVault/item/private-key.pem")
+
+      expect(github.instance_variable_get(:@app_key)).to eq(app_key)
+    end
+
+    it "normalizes app keys read from supported secret references" do
+      allow(SecretResolver).to receive(:supported_reference?)
+        .with("op://ExampleVault/item/escaped-private-key")
+        .and_return(true)
+      allow(SecretResolver).to receive(:read)
+        .with("op://ExampleVault/item/escaped-private-key")
+        .and_return("line one\\nline two")
+
+      github = GitHub.new(app_id: 999, installation_id: 888, app_key: "op://ExampleVault/item/escaped-private-key")
+
+      expect(github.instance_variable_get(:@app_key)).to eq("line one\nline two")
+    end
+
     context "error handling" do
       it "raises error when app key file doesn't exist" do
         expect {
