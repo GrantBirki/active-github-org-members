@@ -44,6 +44,7 @@ Primary code paths:
 - `lib/active_github_org_members.rb`: Scanner and result model.
 - `lib/cli.rb`: CLI parsing and text/JSON output.
 - `lib/github.rb`: GitHub App authentication wrapper around Octokit.
+- `lib/secret_resolver.rb`: URI-scheme based secret reference resolution.
 - `spec/lib/*_spec.rb`: Unit coverage for scanner, CLI, and GitHub auth wrapper.
 
 ## Authentication Model
@@ -59,6 +60,17 @@ export GH_APP_ID="12345"
 export GH_APP_INSTALLATION_ID="87654321"
 export GH_APP_KEY="<GitHub App private key PEM with newlines escaped as \n>"
 ```
+
+The CLI also supports an explicit key source:
+
+```bash
+script/server my-org --app-key "op://ExampleVault/example-item//github-app.private-key.pem"
+```
+
+`op://...` references are resolved by `SecretResolver` through `op read`. Do not
+encourage users to pass literal private key material on the command line because
+it may land in shell history or process listings. Prefer `op://` references,
+`.pem` file paths, or `GH_APP_KEY`.
 
 Optional environment variables:
 

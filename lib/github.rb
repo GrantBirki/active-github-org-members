@@ -15,6 +15,8 @@ require "octokit"
 require "jwt"
 require "redacting_logger"
 
+require_relative "secret_resolver"
+
 class GitHub
   TOKEN_EXPIRATION_TIME = 2700 # 45 minutes
   JWT_EXPIRATION_TIME = 600 # 10 minutes
@@ -25,12 +27,14 @@ class GitHub
   # @param app_id [Integer, nil] GitHub App ID from the App's settings page. If nil, reads from GH_APP_ID env var
   # @param installation_id [Integer, nil] Installation ID from the organization's installations page. If nil, reads from GH_APP_INSTALLATION_ID env var
   # @param app_key [String, nil] Private key for the GitHub App. Can be:
+  #   - Supported secret reference such as op://... (resolved by SecretResolver)
   #   - File path ending in .pem (will read from file)
   #   - Key string with escaped newline sequences (will be normalized)
   #   - nil (will read from GH_APP_KEY env var)
   # @param app_algo [String, nil] JWT signing algorithm. If nil, reads from GH_APP_ALGO env var (default: RS256)
   #
   # @raise [RuntimeError] If required environment variables are not set when parameters are nil
+  # @raise [RuntimeError] If app_key secret reference cannot be read
   # @raise [RuntimeError] If app_key file path is provided but file doesn't exist or is empty
   #
   # @example Basic usage with environment variables
@@ -292,12 +296,14 @@ class GitHub
   # Resolves the GitHub App private key from various sources
   #
   # Handles multiple input formats for the GitHub App private key:
+  # - Supported secret reference such as op://... (resolved by SecretResolver)
   # - File path ending in .pem (reads from file system)
   # - Key string with escape sequences (normalizes \n sequences)
   # - nil (falls back to GH_APP_KEY environment variable)
   #
   # @param app_key [String, nil] The app key parameter from initialization
   # @return [String] The resolved and normalized private key content
+  # @raise [RuntimeError] If app_key secret reference cannot be read
   # @raise [RuntimeError] If app_key file path is provided but file doesn't exist
   # @raise [RuntimeError] If app_key file path is provided but file is empty
   # @raise [RuntimeError] If GH_APP_KEY environment variable is not set when app_key is nil
@@ -305,6 +311,8 @@ class GitHub
   def resolve_app_key(app_key)
     # If app_key is provided as a parameter
     if app_key
+      return normalize_key_string(SecretResolver.read(app_key)) if SecretResolver.supported_reference?(app_key)
+
       # Check if it's a file path (ends with .pem)
       if app_key.end_with?(".pem")
         unless File.exist?(app_key)
